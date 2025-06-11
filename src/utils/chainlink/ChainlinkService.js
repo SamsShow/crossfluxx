@@ -199,6 +199,42 @@ export class ChainlinkService {
      * Setup integration between services
      */
     setupServiceIntegration() {
+        console.log('🔄 Setting up service integration...');
+        
+        // Data Feeds -> Automation integration
+        if (this.services.dataFeeds && this.services.automation) {
+            this.services.dataFeeds.on('significantPriceChange', async (priceData) => {
+                console.log('📈 Significant price change detected, checking rebalance conditions');
+                await this.services.automation.checkRebalanceNeed(priceData);
+            });
+        }
+
+        // Automation -> CCIP integration
+        if (this.services.automation && this.services.ccip) {
+            this.services.automation.on('rebalanceTriggered', async (rebalanceData) => {
+                console.log('🎯 Rebalance triggered, executing cross-chain strategy');
+                await this.executeRebalance(rebalanceData);
+            });
+        }
+
+        // Data Streams -> Functions integration
+        if (this.services.dataStreams && this.services.functions) {
+            this.services.dataStreams.on('yieldOpportunity', async (opportunityData) => {
+                console.log('🌾 Yield opportunity detected, analyzing with Functions');
+                // Trigger yield optimization analysis
+            });
+        }
+
+        // Error handling for all services
+        Object.entries(this.services).forEach(([serviceName, service]) => {
+            service.on('error', (error) => {
+                this.handleServiceError(serviceName, error);
+            });
+        });
+        
+        console.log('✅ Service integration complete');
+    }
+    setupServiceIntegration() {
         // CCIP + Data Feeds integration
         if (this.services.ccip && this.services.dataFeeds) {
             this.services.dataFeeds.on('priceUpdate', (data) => {

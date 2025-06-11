@@ -1,16 +1,48 @@
-// Import ABIs from separate contract files
-import CrossfluxxCoreABI from './CrossfluxxCore.js';
-import HealthCheckerABI from './HealthChecker.js';
-import CCIPModuleABI from './CCIPModule.js';
-import RebalanceExecutorABI from './RebalanceExecutor.js';
+// Import ABIs from separate contract files (using dynamic imports for JSON)
+// For now, we'll define ABIs inline since the contract files are raw JSON
 
-// Export the imported ABIs with descriptive names
-export { 
-  CrossfluxxCoreABI,
-  HealthCheckerABI, 
-  CCIPModuleABI,
-  RebalanceExecutorABI
-};
+// CrossfluxxCore ABI - main contract for deposits and rebalancing
+export const CrossfluxxCoreABI = [
+  "function deposit(uint256 amount, uint64[] memory preferredChains, uint256[] memory thresholds) external",
+  "function withdraw(uint256 amount) external",
+  "function checkUpkeep(bytes calldata checkData) external view returns (bool upkeepNeeded, bytes memory performData)",
+  "function performUpkeep(bytes calldata performData) external",
+  "function getUserDeposit(address user) external view returns (uint256, uint64[], uint256[])",
+  "function getHealthScore() external view returns (uint256)",
+  "event Deposited(address indexed user, uint256 amount, uint64[] preferredChains)",
+  "event Withdrawn(address indexed user, uint256 amount)",
+  "event RebalanceTriggered(address indexed user, uint256 timestamp)",
+  "event RebalanceExecuted(address indexed user, uint64 fromChain, uint64 toChain, uint256 amount, address targetPool)"
+];
+
+// HealthChecker ABI - Proof of Reserves integration
+export const HealthCheckerABI = [
+  "function verifyCollateral(uint256 vaultId, uint256 amount) external view returns (bool)",
+  "function getCollateralRatio(uint256 vaultId) external view returns (uint256)",
+  "function getReserveData() external view returns (uint256 totalReserves, uint256 totalSupply)",
+  "event CollateralVerified(uint256 indexed vaultId, uint256 amount, bool isHealthy)"
+];
+
+// CCIPModule ABI - Cross-chain interoperability
+export const CCIPModuleABI = [
+  "function sendCrossChainRebalance(uint64 destinationChainSelector, address receiver, uint256 amount, string memory targetProtocol, uint256 gasLimit) external returns (bytes32)",
+  "function estimateFee(uint64 destinationChainSelector, address receiver, uint256 amount, string memory targetProtocol, uint256 gasLimit) external view returns (uint256)",
+  "function allowlistDestinationChain(uint64 destinationChainSelector, bool allowed) external",
+  "function allowlistSourceChain(uint64 sourceChainSelector, bool allowed) external",
+  "function allowlistSender(address sender, bool allowed) external",
+  "function ccipReceive((bytes32 messageId, uint64 sourceChainSelector, bytes sender, bytes data, (address token, uint256 amount)[] tokenAmounts) message) external",
+  "event MessageSent(bytes32 indexed messageId, uint64 indexed destinationChainSelector, address receiver, string targetProtocol, uint256 fees)",
+  "event MessageReceived(bytes32 indexed messageId, uint64 indexed sourceChainSelector, address sender, address token, uint256 amount)"
+];
+
+// RebalanceExecutor ABI - Target chain execution
+export const RebalanceExecutorABI = [
+  "function executeRebalance(address token, uint256 amount, string memory targetProtocol, bytes memory swapData) external",
+  "function estimateRebalanceCost(address token, uint256 amount, string memory targetProtocol) external view returns (uint256)",
+  "function supportedProtocols(string memory protocol) external view returns (bool)",
+  "function setProtocolAdapter(string memory protocol, address adapter) external",
+  "event RebalanceExecuted(address indexed user, address token, uint256 amount, string targetProtocol, uint256 outputAmount)"
+];
 
 // Standard ERC20 ABI for token interactions
 export const ERC20ABI = [
