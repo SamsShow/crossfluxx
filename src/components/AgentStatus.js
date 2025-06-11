@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCrossfluxx } from '../context/CrossfluxxContext';
+import { useCrossfluxx } from '../context/CrossfluxxContext.js';
 
 function AgentStatus() {
   const { isSystemInitialized } = useCrossfluxx();

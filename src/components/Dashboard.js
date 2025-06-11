@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCrossfluxx } from '../context/CrossfluxxContext';
+import { useCrossfluxx } from '../context/CrossfluxxContext.js';
 import { Line, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
