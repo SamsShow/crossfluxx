@@ -1,8 +1,15 @@
 {
   "name": "crossfluxx",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "dependencies": {
+    "@elizaos/core": "^1.0.8",
+    "@elizaos/plugin-bootstrap": "^1.0.8",
+    "@elizaos/plugin-groq": "^1.0.4",
+    "@elizaos/plugin-node": "^1.0.0-alpha.25",
+    "@elizaos/plugin-ollama": "^1.0.3",
+    "@elizaos/plugin-pdf": "^1.0.1",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@testing-library/jest-dom": "^5.17.0",

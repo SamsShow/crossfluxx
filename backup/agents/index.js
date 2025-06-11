@@ -68,8 +68,8 @@ class CrossfluxxAgentSystem {
             // Set up inter-agent communication
             await this.setupAgentCommunication();
             
-            // Start monitoring loops (simplified for demo)
-            this.startMonitoringLoops();
+            // Start monitoring loops
+            await this.startMonitoringLoops();
             
             this.isInitialized = true;
             this.isRunning = true;
@@ -134,58 +134,6 @@ class CrossfluxxAgentSystem {
         if (this.agents.coordinator) {
             elizaLogger.info("Coordinator feedback loops established");
         }
-    }
-
-    startMonitoringLoops() {
-        elizaLogger.info("Starting system monitoring loops...");
-        
-        // Start periodic system health checks
-        this.healthCheckInterval = setInterval(() => {
-            this.performHealthCheck();
-        }, 60000); // Every minute
-        
-        // Start rebalance evaluation checks
-        this.rebalanceCheckInterval = setInterval(() => {
-            this.checkRebalanceTriggers();
-        }, this.config.rebalanceInterval);
-        
-        elizaLogger.info("Monitoring loops started successfully");
-    }
-
-    performHealthCheck() {
-        try {
-            // Check agent status
-            const agentStatuses = Object.keys(this.agents).map(name => ({
-                name,
-                status: this.agents[name] ? 'healthy' : 'error'
-            }));
-            
-            // Update metrics
-            this.systemMetrics.uptime = Date.now() - this.systemMetrics.uptime;
-            
-            elizaLogger.info("Health check completed", { agentStatuses });
-        } catch (error) {
-            elizaLogger.error("Health check failed:", error);
-        }
-    }
-
-    async checkRebalanceTriggers() {
-        try {
-            // Simplified trigger checking
-            const shouldRebalance = await this.evaluateRebalanceNeed();
-            
-            if (shouldRebalance) {
-                elizaLogger.info("Rebalance trigger detected");
-                // Would trigger actual rebalance in production
-            }
-        } catch (error) {
-            elizaLogger.error("Rebalance check failed:", error);
-        }
-    }
-
-    async evaluateRebalanceNeed() {
-        // Simplified evaluation - in production would use real market data
-        return Math.random() > 0.8; // 20% chance for demo
     }
 
     // Public API methods for frontend integration
