@@ -58,11 +58,21 @@ const LandingNavbar = () => {
               transition={{ duration: 0.6 }}
               className="relative"
             >
-              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center shadow-lg shadow-green-500/30">
-                <span className="text-black font-bold text-lg">CF</span>
+              <div className="w-10 h-10 flex items-center justify-center">
+                <img 
+                  src="/logo.svg" 
+                  alt="Crossfluxx Logo" 
+                  className="w-10 h-10 object-contain filter drop-shadow-lg"
+                  style={{
+                    filter: 'drop-shadow(0px 0px 10px rgba(50, 205, 106, 0.3))'
+                  }}
+                />
               </div>
               <motion.div
-                className="absolute inset-0 bg-green-400 rounded-lg blur-lg opacity-30"
+                className="absolute inset-0 rounded-lg blur-lg opacity-30"
+                style={{
+                  background: 'radial-gradient(circle, rgba(50, 205, 106, 0.4) 0%, transparent 70%)'
+                }}
                 animate={{
                   opacity: [0.3, 0.6, 0.3]
                 }}

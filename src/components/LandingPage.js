@@ -299,10 +299,20 @@ const LandingPage = () => {
                   animate="animate"
                   className="relative"
                 >
-                  <div className="w-20 h-20 bg-green-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-green-500/20">
-                    <span className="text-black font-bold text-3xl">CF</span>
+                  <div className="w-20 h-20 flex items-center justify-center">
+                    <img 
+                      src="/logo.svg" 
+                      alt="Crossfluxx Logo" 
+                      className="w-20 h-20 object-contain filter drop-shadow-2xl"
+                      style={{
+                        filter: 'drop-shadow(0px 0px 20px rgba(50, 205, 106, 0.5))'
+                      }}
+                    />
                   </div>
-                  <div className="absolute inset-0 bg-green-400 rounded-2xl blur-xl opacity-30 animate-pulse"></div>
+                  <div className="absolute inset-0 rounded-2xl blur-xl opacity-30 animate-pulse"
+                       style={{
+                         background: 'radial-gradient(circle, rgba(50, 205, 106, 0.4) 0%, transparent 70%)'
+                       }}></div>
                 </motion.div>
               </motion.div>
 
@@ -862,9 +872,16 @@ const LandingPage = () => {
                 <motion.div
                   whileHover={{ scale: 1.1, rotate: 360 }}
                   transition={{ duration: 0.6 }}
-                  className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center shadow-lg shadow-green-500/30"
+                  className="w-12 h-12 flex items-center justify-center"
                 >
-                  <span className="text-black font-bold">CF</span>
+                  <img 
+                    src="/logo.svg" 
+                    alt="Crossfluxx Logo" 
+                    className="w-12 h-12 object-contain filter drop-shadow-lg"
+                    style={{
+                      filter: 'drop-shadow(0px 0px 10px rgba(50, 205, 106, 0.3))'
+                    }}
+                  />
                 </motion.div>
                 <div>
                   <div className="text-white font-bold text-lg">Crossfluxx Protocol</div>

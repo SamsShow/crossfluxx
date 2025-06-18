@@ -5,11 +5,11 @@ function AgentStatus() {
   const { isSystemInitialized } = useCrossfluxx();
 
   const AgentCard = ({ name, status, description, lastAction, confidence, metrics }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-gray-800/50 backdrop-blur-sm border border-green-500/20 hover:border-green-400/40 rounded-xl p-6 transition-all duration-300">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className={`w-4 h-4 rounded-full ${status === 'running' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{name}</h3>
+          <h3 className="text-lg font-semibold text-white">{name}</h3>
         </div>
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
           status === 'running' 
@@ -61,8 +61,8 @@ function AgentStatus() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AI Agent Status</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-3xl font-bold text-white">🤖 AI Agent Status</h1>
+          <p className="text-green-400 mt-1">
             Monitor the performance and activity of Crossfluxx AI agents
           </p>
         </div>
