@@ -64,7 +64,10 @@ class StrategyAgent {
                 ]
             });
 
-            await this.setupForkEnvironments();
+            // Setup fork environments (non-blocking)
+            this.setupForkEnvironments().catch(error => {
+                elizaLogger.error("Error setting up fork environments:", error);
+            });
             elizaLogger.info("StrategyAgent initialized successfully");
         } catch (error) {
             elizaLogger.error("Failed to initialize StrategyAgent:", error);
@@ -73,17 +76,24 @@ class StrategyAgent {
     }
 
     async setupForkEnvironments() {
+        elizaLogger.info("Setting up fork environments...");
+        
         for (const [chainName, chainConfig] of Object.entries(this.supportedChains)) {
             try {
-                // Create fork using Hardhat or Tenderly fork
-                const forkProvider = new ethers.JsonRpcProvider(chainConfig.rpc);
+                // Create fork using Hardhat or Tenderly fork (with timeout)
+                const forkProvider = new ethers.JsonRpcProvider(chainConfig.rpc, undefined, {
+                    timeout: 5000 // 5 second timeout
+                });
                 this.forkProviders.set(chainName, forkProvider);
                 
                 elizaLogger.info(`Fork environment created for ${chainName}`);
             } catch (error) {
                 elizaLogger.error(`Failed to create fork for ${chainName}:`, error);
+                // Continue with other chains even if one fails
             }
         }
+        
+        elizaLogger.info("Fork environments setup completed");
     }
 
     createBacktestAction() {
@@ -200,20 +210,14 @@ class StrategyAgent {
     }
 
     async simulateScenario(strategy, scenario) {
-        // Simulate strategy performance under specific market conditions
-        const baseYield = strategy.expectedYield || 0.08; // 8% base APR
-        const volatilityImpact = scenario.volatility * 0.1; // Volatility reduces effective yield
-        const trendImpact = (scenario.trend - 1) * 0.5; // Trend affects yield
-        
-        const simulatedYield = baseYield * scenario.trend - volatilityImpact;
-        const gasImpact = strategy.crossChainMoves * 0.002; // 0.2% gas cost per move
-        
+        // TODO: Implement real strategy simulation using fork testing
+        console.log("❌ simulateScenario not implemented - needs real fork simulation");
         return {
             scenario: scenario.name,
-            grossYield: simulatedYield,
-            netYield: simulatedYield - gasImpact,
-            volatility: scenario.volatility,
-            confidence: Math.max(0.1, 1 - scenario.volatility)
+            grossYield: null,
+            netYield: null,
+            volatility: null,
+            confidence: 0
         };
     }
 
@@ -236,25 +240,9 @@ class StrategyAgent {
     }
 
     async fetchChainAPRs() {
-        const aprData = {};
-        
-        for (const [chainName, chainConfig] of Object.entries(this.supportedChains)) {
-            try {
-                // Simulate fetching real APR data from DeFi protocols
-                // In production, this would call actual DeFi protocol APIs
-                aprData[chainName] = {
-                    aave: Math.random() * 0.1 + 0.03, // 3-13% APR
-                    compound: Math.random() * 0.08 + 0.02, // 2-10% APR
-                    uniswap: Math.random() * 0.15 + 0.05, // 5-20% APR
-                    timestamp: Date.now()
-                };
-            } catch (error) {
-                elizaLogger.error(`Failed to fetch APR for ${chainName}:`, error);
-                aprData[chainName] = { error: "Failed to fetch" };
-            }
-        }
-        
-        return aprData;
+        // TODO: Implement real DeFi protocol API calls (Aave, Compound, Uniswap)
+        console.log("❌ fetchChainAPRs not implemented - needs real DeFi API integration");
+        return null;
     }
 
     calculateOptimalAllocation(chainAPRs, currentAllocation) {

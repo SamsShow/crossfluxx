@@ -1,12 +1,17 @@
-import { AgentRuntime, elizaLogger } from '@elizaos/core';
-import { bootstrapPlugin } from '@elizaos/plugin-bootstrap';
-import CrossfluxxStrategyAgent from './CrossfluxxAgent.js';
-import CrossfluxxSignalAgent from './SignalAgent.js';
+import StrategyAgent from './StrategyAgent.js';
+import SignalAgent from './SignalAgent.js';
+
+// Simplified logger for demo purposes
+const elizaLogger = {
+    info: (message, data) => console.log('INFO:', message, data || ''),
+    warn: (message, data) => console.warn('WARN:', message, data || ''),
+    error: (message, data) => console.error('ERROR:', message, data || '')
+};
 
 /**
  * Crossfluxx Voting Coordinator - Uses Eliza OS for consensus-based rebalancing decisions
  */
-class CrossfluxxVotingCoordinator {
+class VotingCoordinator {
     constructor(config = {}) {
         this.config = {
             apiKeys: {
@@ -59,7 +64,7 @@ class CrossfluxxVotingCoordinator {
             // Simplified initialization
             this.runtime = {
                 character: this.character,
-                plugins: [bootstrapPlugin],
+                plugins: [],
                 isReady: true
             };
             
@@ -157,11 +162,11 @@ class CrossfluxxVotingCoordinator {
         console.log('🔧 Initializing sub-agents...');
         
         // Initialize Strategy Agent
-        this.strategyAgent = new CrossfluxxStrategyAgent(this.config);
+        this.strategyAgent = new StrategyAgent(this.config);
         await this.strategyAgent.initialize();
         
         // Initialize Signal Agent
-        this.signalAgent = new CrossfluxxSignalAgent(this.config);
+        this.signalAgent = new SignalAgent(this.config);
         await this.signalAgent.initialize();
         
         console.log('✅ Sub-agents initialized successfully');
@@ -764,36 +769,26 @@ Last Risk Check: ${new Date().toLocaleTimeString()}`;
 
     // Execution and utility methods
     async executeRebalancePlan(planDescription) {
-        console.log('⚡ Executing rebalancing plan...');
-        
-        if (this.config.execution.dryRun) {
-            console.log('🧪 DRY RUN MODE - No actual transactions will be executed');
-        }
-        
-        // Simulate execution
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
+        // TODO: Implement real rebalancing execution via CCIP
+        console.log("❌ executeRebalancePlan not implemented - needs CCIP integration");
         return {
-            success: true,
-            dryRun: this.config.execution.dryRun,
-            transactions: this.config.execution.dryRun ? [] : ['0x123...', '0x456...'],
-            gasUsed: 185000,
-            executionTime: 290, // seconds
-            finalAllocation: {
-                ethereum: 30000,
-                arbitrum: 45000,
-                polygon: 25000
-            }
+            success: false,
+            error: "Execution not implemented",
+            dryRun: true,
+            transactions: [],
+            gasUsed: 0,
+            executionTime: 0,
+            finalAllocation: null
         };
     }
 
     async initiateEmergencyStop() {
-        console.log('🚨 EMERGENCY STOP ACTIVATED');
-        
+        // TODO: Implement real emergency stop mechanism
+        console.log("❌ initiateEmergencyStop not implemented - needs emergency protocol");
         return {
-            cancelledOperations: 2,
-            status: 'HALTED',
-            notified: true,
+            cancelledOperations: 0,
+            status: 'NOT_IMPLEMENTED',
+            notified: false,
             timestamp: Date.now()
         };
     }
@@ -957,4 +952,4 @@ System learning and optimization ongoing.`;
     }
 }
 
-export default CrossfluxxVotingCoordinator; 
+export default VotingCoordinator; 

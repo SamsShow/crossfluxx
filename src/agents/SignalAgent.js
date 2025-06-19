@@ -1,13 +1,18 @@
-import { AgentRuntime, elizaLogger } from '@elizaos/core';
-import { bootstrapPlugin } from '@elizaos/plugin-bootstrap';
 import axios from 'axios';
 import WebSocket from 'ws';
+
+// Simplified logger for demo purposes
+const elizaLogger = {
+    info: (message, data) => console.log('INFO:', message, data || ''),
+    warn: (message, data) => console.warn('WARN:', message, data || ''),
+    error: (message, data) => console.error('ERROR:', message, data || '')
+};
 
 /**
  * Crossfluxx Signal Agent - Simplified implementation using available Eliza OS exports
  * This agent monitors DeFi yields and market signals across multiple chains
  */
-class CrossfluxxSignalAgent {
+class SignalAgent {
     constructor(config = {}) {
         this.config = {
             apiKeys: {
@@ -19,7 +24,7 @@ class CrossfluxxSignalAgent {
             monitoring: {
                 aprThreshold: config.aprThreshold || 0.05, // 5% change threshold
                 priceThreshold: config.priceThreshold || 0.02, // 2% price change threshold
-                updateInterval: config.updateInterval || 30000, // 30 seconds
+                updateInterval: config.updateInterval || 300000, // 5 minutes (much longer)
                 maxAlerts: config.maxAlerts || 10,
             },
             dataSources: {
@@ -57,14 +62,16 @@ class CrossfluxxSignalAgent {
             // Simplified initialization
             this.runtime = {
                 character,
-                plugins: [bootstrapPlugin],
+                plugins: [],
                 isReady: true
             };
 
             this.isInitialized = true;
             
-            // Start monitoring data streams
-            await this.startMonitoring();
+            // Start monitoring data streams (non-blocking)
+            this.startMonitoring().catch(error => {
+                this.logger.error("❌ Error starting monitoring:", error);
+            });
             
             this.logger.info("✅ Crossfluxx Signal Agent initialized successfully");
             return true;
@@ -135,80 +142,63 @@ class CrossfluxxSignalAgent {
         try {
             this.logger.info("📊 Updating market data...");
             
-            // Fetch data from various sources
+            // Fetch data from various sources (handles null returns gracefully)
             const [aprData, priceData, volumeData] = await Promise.all([
-                this.fetchCurrentAPRs(),
-                this.fetchPriceData(),
-                this.fetchVolumeData()
+                this.fetchCurrentAPRs().catch(e => null),
+                this.fetchPriceData().catch(e => null),
+                this.fetchVolumeData().catch(e => null)
             ]);
 
-            // Update current data
+            // Update current data (even if some are null)
             this.currentData = {
-                aprs: aprData,
-                prices: priceData,
-                volumes: volumeData,
-                lastUpdate: new Date().toISOString()
+                aprs: aprData || {},
+                prices: priceData || {},
+                volumes: volumeData || {},
+                lastUpdate: new Date().toISOString(),
+                status: aprData || priceData || volumeData ? 'partial' : 'no_data'
             };
 
-            // Analyze for alerts
-            await this.checkForAlerts();
+            // Analyze for alerts (safe with null data)
+            this.checkForAlerts();
             
         } catch (error) {
             this.logger.error("❌ Failed to update data:", error);
+            // Set empty data so the system can continue
+            this.currentData = {
+                aprs: {},
+                prices: {},
+                volumes: {},
+                lastUpdate: new Date().toISOString(),
+                status: 'error'
+            };
         }
     }
 
     /**
-     * Fetch current APR data (mock implementation for now)
+     * Fetch current APR data (TODO: Replace with real API calls)
      */
     async fetchCurrentAPRs() {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        return {
-            ethereum: {
-                aave_usdc: 8.3,
-                compound_usdc: 7.1,
-                uniswap_v3_usdc_eth: 15.7
-            },
-            arbitrum: {
-                aave_usdc: 9.2,
-                gmx_staking: 24.1,
-                uniswap_v3_usdc_eth: 18.9
-            },
-            polygon: {
-                aave_usdc: 10.5,
-                quickswap_usdc_matic: 31.7,
-                balancer_stable: 12.3
-            }
-        };
+        // TODO: Implement real DeFiLlama/CoinGecko API calls
+        console.log("❌ fetchCurrentAPRs not implemented - needs real API integration");
+        return null;
     }
 
     /**
-     * Fetch price data (mock implementation)
+     * Fetch price data (TODO: Replace with real API calls)
      */
     async fetchPriceData() {
-        await new Promise(resolve => setTimeout(resolve, 150));
-        
-        return {
-            ethereum: 2341.50,
-            matic: 0.89,
-            arbitrum: 1.12,
-            usdc: 1.0001
-        };
+        // TODO: Implement real CoinGecko/CoinMarketCap API calls
+        console.log("❌ fetchPriceData not implemented - needs real API integration");
+        return null;
     }
 
     /**
-     * Fetch volume data (mock implementation)
+     * Fetch volume data (TODO: Replace with real API calls)
      */
     async fetchVolumeData() {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        return {
-            ethereum: 1200000000,
-            arbitrum: 450000000,
-            polygon: 320000000
-        };
+        // TODO: Implement real DEX volume API calls
+        console.log("❌ fetchVolumeData not implemented - needs real API integration");
+        return null;
     }
 
     /**
@@ -240,34 +230,18 @@ class CrossfluxxSignalAgent {
      * Check for APR-based alerts
      */
     checkAPRAlerts() {
-        const alerts = [];
-        
-        // Mock alert detection
-        if (this.currentData.aprs?.polygon?.quickswap_usdc_matic > 30) {
-            alerts.push({
-                type: 'HIGH_APR',
-                chain: 'polygon',
-                protocol: 'quickswap',
-                value: this.currentData.aprs.polygon.quickswap_usdc_matic,
-                threshold: 30,
-                priority: 'HIGH',
-                timestamp: new Date().toISOString()
-            });
-        }
-        
-        return alerts;
+        // TODO: Implement real alert logic based on actual APR data
+        console.log("❌ checkAPRAlerts not implemented - needs real alert logic");
+        return [];
     }
 
     /**
      * Check for price-based alerts
      */
     checkPriceAlerts() {
-        const alerts = [];
-        
-        // Mock price alert detection
-        // In real implementation, would compare with historical data
-        
-        return alerts;
+        // TODO: Implement real price alert logic with historical data comparison
+        console.log("❌ checkPriceAlerts not implemented - needs real price monitoring");
+        return [];
     }
 
     /**
@@ -304,34 +278,13 @@ class CrossfluxxSignalAgent {
      * Analyze market trends
      */
     async analyzeTrends() {
-        try {
-            this.logger.info("📈 Analyzing market trends...");
-            
-            // Mock trend analysis
-            const trends = {
-                aprTrends: {
-                    ethereum: { direction: 'stable', confidence: 0.7 },
-                    arbitrum: { direction: 'up', confidence: 0.85 },
-                    polygon: { direction: 'up', confidence: 0.92 }
-                },
-                priceTrends: {
-                    ethereum: { direction: 'up', confidence: 0.65 },
-                    matic: { direction: 'stable', confidence: 0.8 }
-                },
-                recommendations: [
-                    "Polygon showing strong yield opportunities",
-                    "Arbitrum yields trending upward",
-                    "Monitor Ethereum gas costs for optimal timing"
-                ]
-            };
-            
-            this.logger.info("✅ Trend analysis completed");
-            return trends;
-            
-        } catch (error) {
-            this.logger.error("❌ Trend analysis failed:", error);
-            throw error;
-        }
+        // TODO: Implement real trend analysis using historical data
+        console.log("❌ analyzeTrends not implemented - needs real market analysis");
+        return {
+            aprTrends: null,
+            priceTrends: null,
+            recommendations: ["Trend analysis not implemented"]
+        };
     }
 
     /**
@@ -413,4 +366,4 @@ class CrossfluxxSignalAgent {
     }
 }
 
-export default CrossfluxxSignalAgent; 
+export default SignalAgent; 

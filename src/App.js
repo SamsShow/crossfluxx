@@ -5,6 +5,9 @@ import Dashboard from './components/Dashboard.js';
 import AgentStatus from './components/AgentStatus.js';
 import RebalanceHistory from './components/RebalanceHistory.js';
 import MarketData from './components/MarketData.js';
+import VaultConfiguration from './components/VaultConfiguration.js';
+import CrossChainManager from './components/CrossChainManager.js';
+import AdminPanel from './components/AdminPanel.js';
 import Navigation from './components/Navigation.js';
 import WalletConnection from './components/WalletConnection.js';
 import NotificationSystem from './components/NotificationSystem.js';
@@ -99,6 +102,9 @@ function App() {
                       <Route path="/agents" element={<AgentStatus />} />
                       <Route path="/history" element={<RebalanceHistory />} />
                       <Route path="/market" element={<MarketData />} />
+                      <Route path="/vault" element={<VaultConfiguration />} />
+                      <Route path="/crosschain" element={<CrossChainManager />} />
+                      <Route path="/admin" element={<AdminPanel />} />
                     </Routes>
                   </div>
                 </main>

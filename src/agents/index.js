@@ -89,20 +89,24 @@ class CrossfluxxAgentSystem {
     async initializeAgents() {
         elizaLogger.info("Initializing individual agents...");
 
-        // Initialize StrategyAgent
-        this.agents.strategy = new StrategyAgent(this.config);
-        await this.agents.strategy.initialize();
-        elizaLogger.info("StrategyAgent initialized");
+        try {
+            // Initialize agents in parallel to speed up the process
+            this.agents.strategy = new StrategyAgent(this.config);
+            this.agents.signal = new SignalAgent(this.config);
+            this.agents.coordinator = new VotingCoordinator(this.config);
 
-        // Initialize SignalAgent
-        this.agents.signal = new SignalAgent(this.config);
-        await this.agents.signal.initialize();
-        elizaLogger.info("SignalAgent initialized");
+            // Initialize all agents in parallel
+            await Promise.all([
+                this.agents.strategy.initialize().catch(e => elizaLogger.error("StrategyAgent init failed:", e)),
+                this.agents.signal.initialize().catch(e => elizaLogger.error("SignalAgent init failed:", e)),
+                this.agents.coordinator.initialize().catch(e => elizaLogger.error("VotingCoordinator init failed:", e))
+            ]);
 
-        // Initialize VotingCoordinator
-        this.agents.coordinator = new VotingCoordinator(this.config);
-        await this.agents.coordinator.initialize();
-        elizaLogger.info("VotingCoordinator initialized");
+            elizaLogger.info("All agents initialized");
+        } catch (error) {
+            elizaLogger.error("Agent initialization error:", error);
+            // Continue anyway to see what works
+        }
     }
 
     async setupAgentCommunication() {
@@ -139,17 +143,22 @@ class CrossfluxxAgentSystem {
     startMonitoringLoops() {
         elizaLogger.info("Starting system monitoring loops...");
         
-        // Start periodic system health checks
-        this.healthCheckInterval = setInterval(() => {
-            this.performHealthCheck();
-        }, 60000); // Every minute
-        
-        // Start rebalance evaluation checks
-        this.rebalanceCheckInterval = setInterval(() => {
-            this.checkRebalanceTriggers();
-        }, this.config.rebalanceInterval);
-        
-        elizaLogger.info("Monitoring loops started successfully");
+        // Only start monitoring if agents are properly initialized
+        if (this.agents.strategy && this.agents.signal && this.agents.coordinator) {
+            // Start periodic system health checks (longer interval to reduce overhead)
+            this.healthCheckInterval = setInterval(() => {
+                this.performHealthCheck();
+            }, 300000); // Every 5 minutes instead of 1 minute
+            
+            // Start rebalance evaluation checks (much longer interval)
+            this.rebalanceCheckInterval = setInterval(() => {
+                this.checkRebalanceTriggers();
+            }, Math.max(this.config.rebalanceInterval, 3600000)); // At least 1 hour
+            
+            elizaLogger.info("Monitoring loops started successfully");
+        } else {
+            elizaLogger.warn("Skipping monitoring loops - agents not fully initialized");
+        }
     }
 
     performHealthCheck() {
@@ -184,8 +193,9 @@ class CrossfluxxAgentSystem {
     }
 
     async evaluateRebalanceNeed() {
-        // Simplified evaluation - in production would use real market data
-        return Math.random() > 0.8; // 20% chance for demo
+        // TODO: Implement real rebalancing need evaluation
+        console.log("❌ evaluateRebalanceNeed not implemented - needs real market data analysis");
+        return false;
     }
 
     // Public API methods for frontend integration
@@ -211,30 +221,16 @@ class CrossfluxxAgentSystem {
     }
 
     async forceRebalanceEvaluation() {
-        elizaLogger.info("Manual rebalance evaluation triggered");
-        
-        const trigger = {
-            type: 'manual',
-            reason: 'Manual rebalance evaluation requested',
-            priority: 'high'
-        };
-        
-        // Simulate decision process for demo
+        // TODO: Implement real manual rebalance evaluation
+        console.log("❌ forceRebalanceEvaluation not implemented - needs real agent coordination");
         return {
-            action: 'rebalance',
-            confidence: 0.85,
-            consensus: 0.75,
+            action: 'no_action',
+            confidence: 0,
+            consensus: 0,
             timestamp: Date.now(),
-            reasoning: ['Manual trigger activated', 'High confidence signal detected', 'Risk assessment passed'],
-            executionPlan: {
-                steps: [
-                    { step: 1, action: 'pre_execution_health_check', description: 'Verify all contracts and balances' },
-                    { step: 2, action: 'execute_rebalance', description: 'Execute cross-chain rebalancing' },
-                    { step: 3, action: 'post_execution_verification', description: 'Verify successful execution' }
-                ],
-                estimatedTime: 390,
-                estimatedGasCost: 580000
-            }
+            reasoning: ['Function not implemented'],
+            executionPlan: null,
+            error: "Manual evaluation not implemented"
         };
     }
 }
