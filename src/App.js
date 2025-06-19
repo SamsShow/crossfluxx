@@ -7,6 +7,7 @@ import RebalanceHistory from './components/RebalanceHistory.js';
 import MarketData from './components/MarketData.js';
 import Navigation from './components/Navigation.js';
 import WalletConnection from './components/WalletConnection.js';
+import NotificationSystem from './components/NotificationSystem.js';
 import { CrossfluxxProvider } from './context/CrossfluxxContext.js';
 import './App.css';
 
@@ -129,6 +130,9 @@ function App() {
             </div>
           } />
         </Routes>
+        
+        {/* Global Notification System */}
+        <NotificationSystem />
       </Router>
     </CrossfluxxProvider>
   );

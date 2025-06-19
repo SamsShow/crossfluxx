@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
-import { CCIPModuleABI } from '../../contracts/Crossfluxx.js';
-import { CHAIN_CONFIGS } from '../../contracts/Crossfluxx.js';
+import { CCIPModuleABI, CHAIN_CONFIGS } from '../../contracts/constants.js';
 
 /**
  * Chainlink CCIP Service
@@ -396,7 +395,7 @@ export class CCIPService {
                 receiver,
                 token,
                 amount,
-                typeof data === 'object' ? ethers.AbiCoder.defaultAbiCoder().encode(
+                typeof data === 'object' ? ethers.utils.defaultAbiCoder().encode(
                     ['tuple(address,address,uint256,address,uint256,uint256)'],
                     [data]
                 ) : data
@@ -416,13 +415,13 @@ export class CCIPService {
     async estimateFee(sourceChainId, destinationChainId, messageData) {
         try {
             // For demo purposes, return a mock fee calculation
-            const baseFee = ethers.parseEther('0.001'); // 0.001 ETH base
+            const baseFee = ethers.utils.parseEther('0.001'); // 0.001 ETH base
             const gasMultiplier = messageData.amount ? 
-                BigInt(Math.floor(Number(messageData.amount) / 1000000)) : 1n; // Scale with amount
+                Math.floor(Number(messageData.amount) / 1000000) : 1; // Scale with amount
             
-            const estimatedFee = baseFee + (gasMultiplier * ethers.parseUnits('100', 'gwei'));
+            const estimatedFee = baseFee.add(ethers.utils.parseUnits((gasMultiplier * 100).toString(), 'gwei'));
             
-            console.log(`💰 Estimated CCIP fee: ${ethers.formatEther(estimatedFee)} ETH`);
+            console.log(`💰 Estimated CCIP fee: ${ethers.utils.formatEther(estimatedFee)} ETH`);
             
             this.updateMetrics('feeEstimations');
             
@@ -432,7 +431,7 @@ export class CCIPService {
             console.error('❌ Fee estimation failed:', error);
             this.updateMetrics('errors');
             // Return mock fee for demo
-            return ethers.parseEther('0.001');
+            return ethers.utils.parseEther('0.001');
         }
     }
 
@@ -621,7 +620,7 @@ export class CCIPService {
             
         } catch (error) {
             console.error('Failed to get gas price:', error);
-            return ethers.parseUnits('20', 'gwei'); // Fallback
+            return ethers.utils.parseUnits('20', 'gwei'); // Fallback
         }
     }
 

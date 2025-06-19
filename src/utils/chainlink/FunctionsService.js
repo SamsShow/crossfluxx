@@ -467,7 +467,7 @@ export class FunctionsService {
             language: 0 // JavaScript
         };
 
-        return ethers.AbiCoder.defaultAbiCoder().encode(
+        return ethers.utils.defaultAbiCoder().encode(
             ['string', 'string[]'],
             [requestConfig.source, requestConfig.args]
         );

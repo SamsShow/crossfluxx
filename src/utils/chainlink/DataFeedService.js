@@ -605,10 +605,10 @@ export class DataFeedService {
                 return await provider.getGasPrice();
             }
             
-            return ethers.parseUnits('20', 'gwei'); // Fallback
+            return ethers.utils.parseUnits('20', 'gwei'); // Fallback
             
         } catch (error) {
-            return ethers.parseUnits('20', 'gwei'); // Fallback
+            return ethers.utils.parseUnits('20', 'gwei'); // Fallback
         }
     }
 

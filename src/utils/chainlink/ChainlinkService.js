@@ -4,7 +4,7 @@ import { DataFeedService } from './DataFeedService.js';
 import { AutomationService } from './AutomationService.js';
 import { FunctionsService } from './FunctionsService.js';
 import { DataStreamsService } from './DataStreamsService.js';
-import { CONTRACT_ADDRESSES, CHAIN_CONFIGS } from '../../contracts/Crossfluxx.js';
+import { CONTRACT_ADDRESSES, CHAIN_CONFIGS } from '../../contracts/constants.js';
 
 /**
  * Main Chainlink Service Manager
@@ -31,7 +31,7 @@ export class ChainlinkService {
             
             automation: {
                 checkInterval: config.automation?.checkInterval || 60000, // 1 minute
-                maxGasPrice: config.automation?.maxGasPrice || ethers.parseUnits('50', 'gwei'),
+                maxGasPrice: config.automation?.maxGasPrice || ethers.utils.parseUnits('50', 'gwei'),
                 rebalanceThreshold: config.automation?.rebalanceThreshold || 100 // 1% APY difference
             },
             

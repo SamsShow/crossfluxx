@@ -2,7 +2,7 @@ import React from 'react';
 import { useCrossfluxx } from '../context/CrossfluxxContext.js';
 
 function AgentStatus() {
-  const { isSystemInitialized } = useCrossfluxx();
+  const { isSystemInitialized, agentStatus, systemHealth } = useCrossfluxx();
 
   const AgentCard = ({ name, status, description, lastAction, confidence, metrics }) => (
     <div className="bg-gray-800/50 backdrop-blur-sm border border-green-500/20 hover:border-green-400/40 rounded-xl p-6 transition-all duration-300">
@@ -71,11 +71,11 @@ function AgentStatus() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <AgentCard
           name="Strategy Agent"
-          status={isSystemInitialized ? 'running' : 'starting'}
+          status={agentStatus.strategy?.status || (isSystemInitialized ? 'running' : 'starting')}
           description="Backtests yield rebalancing strategies on private forks and calculates expected returns with risk assessments."
-          lastAction="Completed backtest simulation for 4 market scenarios"
-          confidence={85}
-          metrics={{
+          lastAction={agentStatus.strategy?.lastAction || "Completed backtest simulation for 4 market scenarios"}
+          confidence={agentStatus.strategy?.confidence || 85}
+          metrics={agentStatus.strategy?.metrics || {
             'Simulations Run': '247',
             'Success Rate': '87.5%',
             'Avg Confidence': '82.3%',
@@ -85,11 +85,11 @@ function AgentStatus() {
 
         <AgentCard
           name="Signal Agent"
-          status={isSystemInitialized ? 'running' : 'starting'}
+          status={agentStatus.signal?.status || (isSystemInitialized ? 'running' : 'starting')}
           description="Monitors real-time APR data, market conditions, and cross-chain opportunities from multiple DeFi protocols."
-          lastAction="Updated APR data from Aave, Compound, and Uniswap"
-          confidence={79}
-          metrics={{
+          lastAction={agentStatus.signal?.lastAction || "Updated APR data from Aave, Compound, and Uniswap"}
+          confidence={agentStatus.signal?.confidence || 79}
+          metrics={agentStatus.signal?.metrics || {
             'Data Sources': '12',
             'Update Frequency': '60s',
             'Signal Strength': 'Strong',
@@ -99,11 +99,11 @@ function AgentStatus() {
 
         <AgentCard
           name="Voting Coordinator"
-          status={isSystemInitialized ? 'running' : 'starting'}
+          status={agentStatus.coordinator?.status || (isSystemInitialized ? 'running' : 'starting')}
           description="Aggregates inputs from other agents via consensus algorithms to make final rebalancing decisions."
-          lastAction="Evaluated rebalancing proposal with 75% consensus"
-          confidence={92}
-          metrics={{
+          lastAction={agentStatus.coordinator?.lastAction || "Evaluated rebalancing proposal with 75% consensus"}
+          confidence={agentStatus.coordinator?.confidence || 92}
+          metrics={agentStatus.coordinator?.metrics || {
             'Total Decisions': '42',
             'Consensus Rate': '75%',
             'Execution Success': '94.7%',

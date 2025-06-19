@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCrossfluxx } from '../context/CrossfluxxContext.js';
 
 function RebalanceHistory() {
-  // Mock rebalance history data
+  const { rebalanceHistory, currentRebalance, isRebalancing } = useCrossfluxx();
+
+  // Use real data or fallback to mock data
   const [historyData] = useState([
     {
       id: 1,
@@ -161,9 +164,12 @@ function RebalanceHistory() {
     }
   };
 
-  const filteredData = historyData.filter(item => {
+  // Use real history data when available, otherwise use mock data
+  const displayData = rebalanceHistory && rebalanceHistory.length > 0 ? rebalanceHistory : historyData;
+  
+  const filteredData = displayData.filter(item => {
     if (filter === 'all') return true;
-    return item.action.toLowerCase() === filter.toLowerCase();
+    return item.action?.toLowerCase() === filter.toLowerCase() || item.type?.toLowerCase().includes(filter.toLowerCase());
   });
 
   const StatCard = ({ title, value, subtitle, icon, trend }) => (

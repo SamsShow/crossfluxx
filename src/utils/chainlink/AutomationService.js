@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { CrossfluxxCoreABI } from '../../contracts/Crossfluxx.js';
+import { CrossfluxxCoreABI } from '../../contracts/constants.js';
 
 /**
  * Chainlink Automation Service
@@ -333,7 +333,7 @@ export class AutomationService {
             // Check gas price before execution
             const gasPrice = await this.providers[network].getGasPrice();
             if (gasPrice > this.config.config.maxGasPrice) {
-                throw new Error(`Gas price too high: ${ethers.formatUnits(gasPrice, 'gwei')} gwei`);
+                throw new Error(`Gas price too high: ${ethers.utils.formatUnits(gasPrice, 'gwei')} gwei`);
             }
 
             // Execute performUpkeep
