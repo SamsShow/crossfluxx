@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { Contract, parseUnits } from 'ethers';
 import axios from 'axios';
 
 /**
@@ -132,7 +132,7 @@ export class DataFeedService {
         // Initialize each price feed contract
         for (const [pair, address] of Object.entries(feeds)) {
             try {
-                this.dataFeeds[chainId][pair] = new ethers.Contract(
+                this.dataFeeds[chainId][pair] = new Contract(
                     address,
                     [
                         'function latestRoundData() view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)',
@@ -605,10 +605,10 @@ export class DataFeedService {
                 return await provider.getGasPrice();
             }
             
-            return ethers.utils.parseUnits('20', 'gwei'); // Fallback
+            return parseUnits('20', 'gwei'); // Fallback
             
         } catch (error) {
-            return ethers.utils.parseUnits('20', 'gwei'); // Fallback
+            return parseUnits('20', 'gwei'); // Fallback
         }
     }
 

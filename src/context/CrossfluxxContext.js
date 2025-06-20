@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import { ethers } from 'ethers';
+import { BrowserProvider, formatEther, Contract } from 'ethers';
 
 // Import contract interfaces and services
 import CrossfluxxCoreABI from '../contracts/CrossfluxxCore.json';
@@ -388,7 +388,7 @@ export function CrossfluxxProvider({ children }) {
         throw new Error('No accounts found');
       }
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+              const provider = new BrowserProvider(window.ethereum);
       const signer = provider.getSigner();
       const account = accounts[0];
 
@@ -413,7 +413,7 @@ export function CrossfluxxProvider({ children }) {
       const balance = await provider.getBalance(account);
       dispatch({
         type: ActionTypes.SET_BALANCE,
-        payload: ethers.utils.formatEther(balance)
+                        payload: formatEther(balance)
       });
 
       // Initialize contracts and services
@@ -471,19 +471,19 @@ export function CrossfluxxProvider({ children }) {
       // Get contract addresses for current chain (fallback to Sepolia)
       const addresses = CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[11155111];
 
-      const coreContract = new ethers.Contract(
+      const coreContract = new Contract(
         addresses.CrossfluxxCore || "0x1234567890123456789012345678901234567890",
         CrossfluxxCoreABI,
         signer
       );
 
-      const healthCheckerContract = new ethers.Contract(
+      const healthCheckerContract = new Contract(
         addresses.HealthChecker || "0x2345678901234567890123456789012345678901",
         HealthCheckerABI,
         signer
       );
 
-      const ccipContract = new ethers.Contract(
+      const ccipContract = new Contract(
         addresses.CCIPModule || "0x3456789012345678901234567890123456789012",
         CCIPModuleABI,
         signer
@@ -710,6 +710,10 @@ export function CrossfluxxProvider({ children }) {
   // Portfolio Functions
   const deposit = useCallback(async (amount, preferredChains, thresholds) => {
     try {
+      if (!state.account) {
+        throw new Error('Wallet not connected');
+      }
+
       if (!state.contracts.core) {
         throw new Error('Core contract not initialized');
       }
@@ -728,9 +732,11 @@ export function CrossfluxxProvider({ children }) {
         }
       });
 
+      console.log('🔄 Processing deposit:', { amount, preferredChains, thresholds });
+
       // Simulate contract call
       // const tx = await state.contracts.core.deposit(
-      //   ethers.utils.parseEther(amount),
+      //   parseEther(amount), // Note: import parseEther if uncommenting
       //   preferredChains,
       //   thresholds
       // );
@@ -751,8 +757,37 @@ export function CrossfluxxProvider({ children }) {
           }
         });
 
-        // Update user deposits
-        fetchUserPortfolio();
+        // Update user deposits - using the new deposited amount
+        const newDeposit = {
+          id: Date.now(),
+          amount: amount,
+          chain: 'ethereum', // Default to ethereum
+          protocol: 'aave',
+          timestamp: Date.now(),
+          currentValue: amount, // Initially same as deposit
+          apr: 6.5
+        };
+
+        // Add to existing deposits
+        const updatedDeposits = [...state.userDeposits, newDeposit];
+        const totalDeposited = updatedDeposits.reduce((sum, deposit) => sum + parseFloat(deposit.amount), 0).toString();
+        const portfolioValue = updatedDeposits.reduce((sum, deposit) => sum + parseFloat(deposit.currentValue), 0).toString();
+        const totalEarnings = (parseFloat(portfolioValue) - parseFloat(totalDeposited)).toString();
+        const currentAPR = updatedDeposits.reduce((sum, deposit, idx, arr) => 
+          sum + (deposit.apr / arr.length), 0);
+
+        dispatch({
+          type: ActionTypes.UPDATE_USER_DEPOSITS,
+          payload: { deposits: updatedDeposits, totalDeposited }
+        });
+
+        dispatch({
+          type: ActionTypes.UPDATE_PORTFOLIO_VALUE,
+          payload: { portfolioValue, totalEarnings, currentAPR }
+        });
+
+        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+
       }, 3000);
 
     } catch (error) {
@@ -761,10 +796,19 @@ export function CrossfluxxProvider({ children }) {
         type: ActionTypes.SET_ERROR,
         payload: error.message
       });
-    } finally {
+      
+      dispatch({
+        type: ActionTypes.ADD_NOTIFICATION,
+        payload: {
+          type: 'error',
+          title: 'Deposit Failed',
+          message: error.message
+        }
+      });
+      
       dispatch({ type: ActionTypes.SET_LOADING, payload: false });
     }
-  }, [state.contracts.core]);
+  }, [state.contracts.core, state.account, state.userDeposits]);
 
   const fetchUserPortfolio = useCallback(async () => {
     if (!state.account) return;

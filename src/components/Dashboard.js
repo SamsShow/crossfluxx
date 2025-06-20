@@ -39,7 +39,8 @@ function Dashboard() {
     isRebalancing,
     currentRebalance,
     loading,
-    deposit
+    deposit,
+    addNotification
   } = useCrossfluxx();
 
   const [depositAmount, setDepositAmount] = useState('');
@@ -250,14 +251,43 @@ function Dashboard() {
   );
 
   const handleDeposit = async () => {
-    if (!depositAmount || parseFloat(depositAmount) <= 0) return;
+    if (!depositAmount || parseFloat(depositAmount) <= 0) {
+      addNotification({
+        type: 'error',
+        title: 'Invalid Amount',
+        message: 'Please enter a valid deposit amount greater than 0'
+      });
+      return;
+    }
+
+    if (!isWalletConnected) {
+      addNotification({
+        type: 'error',
+        title: 'Wallet Not Connected',
+        message: 'Please connect your wallet before making a deposit'
+      });
+      return;
+    }
     
     try {
+      console.log('💰 Initiating deposit:', depositAmount, 'ETH');
+      
+      addNotification({
+        type: 'info',
+        title: 'Deposit Initiated',
+        message: `Processing ${depositAmount} ETH deposit...`
+      });
+
       await deposit(depositAmount, ['ethereum', 'arbitrum', 'polygon'], [0.05, 0.1, 0.15]);
       setDepositAmount('');
       setShowDepositModal(false);
     } catch (error) {
       console.error('Deposit failed:', error);
+      addNotification({
+        type: 'error',
+        title: 'Deposit Failed',
+        message: error.message || 'An unexpected error occurred during deposit'
+      });
     }
   };
 
@@ -280,6 +310,20 @@ function Dashboard() {
           >
             <h3 className="text-xl font-bold text-white mb-4">💰 Deposit ETH</h3>
             
+            {/* Wallet Connection Status */}
+            <div className={`mb-4 p-3 rounded-lg text-sm ${
+              isWalletConnected 
+                ? 'bg-green-900/20 border border-green-500/30 text-green-400' 
+                : 'bg-red-900/20 border border-red-500/30 text-red-400'
+            }`}>
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${isWalletConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="font-medium">
+                  {isWalletConnected ? `Connected: ${account?.slice(0, 6)}...${account?.slice(-4)}` : 'Wallet not connected'}
+                </span>
+              </div>
+            </div>
+            
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">
@@ -290,7 +334,8 @@ function Dashboard() {
                   value={depositAmount}
                   onChange={(e) => setDepositAmount(e.target.value)}
                   placeholder="0.0"
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-green-500"
+                  disabled={!isWalletConnected}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -309,10 +354,10 @@ function Dashboard() {
                 </button>
                 <button
                   onClick={handleDeposit}
-                  disabled={!depositAmount || parseFloat(depositAmount) <= 0 || loading}
+                  disabled={!depositAmount || parseFloat(depositAmount) <= 0 || loading || !isWalletConnected}
                   className="flex-1 px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-500 hover:to-green-400 disabled:opacity-50 transition-all"
                 >
-                  {loading ? 'Processing...' : 'Deposit'}
+                  {loading ? 'Processing...' : !isWalletConnected ? 'Connect Wallet' : 'Deposit'}
                 </button>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { JsonRpcProvider } from 'ethers';
 import axios from 'axios';
 
 // Simplified logger for demo purposes
@@ -81,7 +81,7 @@ class StrategyAgent {
         for (const [chainName, chainConfig] of Object.entries(this.supportedChains)) {
             try {
                 // Create fork using Hardhat or Tenderly fork (with timeout)
-                const forkProvider = new ethers.JsonRpcProvider(chainConfig.rpc, undefined, {
+                const forkProvider = new JsonRpcProvider(chainConfig.rpc, undefined, {
                     timeout: 5000 // 5 second timeout
                 });
                 this.forkProviders.set(chainName, forkProvider);
