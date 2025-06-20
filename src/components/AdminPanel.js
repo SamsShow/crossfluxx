@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useCrossfluxx } from '../context/CrossfluxxContext.js';
-import { parseEther, formatEther, isAddress } from 'ethers';
+import { ethers } from 'ethers';
 
 const AdminPanel = () => {
     const {
@@ -139,7 +139,7 @@ const AdminPanel = () => {
                 return;
             }
 
-            if (!isAddress(tokenForm.address)) {
+            if (!ethers.utils.isAddress(tokenForm.address)) {
                 console.error('Invalid token address');
                 return;
             }
@@ -175,15 +175,15 @@ const AdminPanel = () => {
                 return;
             }
 
-            if (!isAddress(yieldDataForm.poolAddress) || 
-                !isAddress(yieldDataForm.priceFeed)) {
+            if (!ethers.utils.isAddress(yieldDataForm.poolAddress) || 
+                !ethers.utils.isAddress(yieldDataForm.priceFeed)) {
                 console.error('Invalid pool or price feed address');
                 return;
             }
 
             // Convert APY percentage to basis points
             const apyBasisPoints = Math.floor(parseFloat(yieldDataForm.apy) * 100);
-            const tvlWei = parseEther(yieldDataForm.tvl);
+            const tvlWei = ethers.utils.parseEther(yieldDataForm.tvl);
 
             console.log('Updating yield data:', {
                 chainId: yieldDataForm.chainId,
@@ -230,7 +230,7 @@ const AdminPanel = () => {
     };
 
     const formatTVL = (tvlWei) => {
-        const tvlEth = formatEther(tvlWei);
+        const tvlEth = ethers.utils.formatEther(tvlWei);
         return parseFloat(tvlEth).toLocaleString() + ' ETH';
     };
 

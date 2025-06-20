@@ -10,7 +10,7 @@ const elizaLogger = {
 };
 
 /**
- * CrossfluxxAgentSystem - Main coordinator for all Eliza OS agents
+ * CrossfluxxAgentSystem - Main coordinator for all agents
  * 
  * This system manages the lifecycle and interaction between:
  * - StrategyAgent: Backtests and optimizes yield strategies

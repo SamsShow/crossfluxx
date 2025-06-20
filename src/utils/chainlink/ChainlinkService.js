@@ -1,4 +1,4 @@
-import { ethers, parseUnits } from 'ethers';
+import { ethers } from 'ethers';
 import { CCIPService } from './CCIPService.js';
 import { DataFeedService } from './DataFeedService.js';
 import { AutomationService } from './AutomationService.js';
@@ -31,7 +31,7 @@ export class ChainlinkService {
             
             automation: {
                 checkInterval: config.automation?.checkInterval || 60000, // 1 minute
-                maxGasPrice: config.automation?.maxGasPrice || parseUnits('50', 'gwei'),
+                maxGasPrice: config.automation?.maxGasPrice || ethers.utils.parseUnits('50', 'gwei'),
                 rebalanceThreshold: config.automation?.rebalanceThreshold || 100 // 1% APY difference
             },
             

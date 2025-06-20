@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useCrossfluxx } from '../context/CrossfluxxContext.js';
-import { parseUnits, parseEther, formatEther, getAddress } from 'ethers';
+import { ethers } from 'ethers';
 
 const CrossChainManager = () => {
     const {
@@ -110,8 +110,8 @@ const CrossChainManager = () => {
 
             if (contractValidation === 'mock') {
                 // Mock fee estimation for demo
-                const baseFee = parseEther('0.001');
-                const amountWei = parseUnits(amount || '100', tokenData.decimals);
+                const baseFee = ethers.utils.parseEther('0.001');
+                const amountWei = ethers.utils.parseUnits(amount || '100', tokenData.decimals);
                 const estimatedFee = baseFee.add(amountWei.div(1000)); // 0.1% of amount
 
                 const feeKey = `${fromChain}-${toChain}-${token}`;
@@ -119,16 +119,16 @@ const CrossChainManager = () => {
                     ...prev,
                     [feeKey]: {
                         fee: estimatedFee.toString(),
-                        formattedFee: formatEther(estimatedFee),
+                        formattedFee: ethers.utils.formatEther(estimatedFee),
                         timestamp: Date.now()
                     }
                 }));
 
-                addNotification('success', 'Fee Estimated', `CCIP fee: ~${formatEther(estimatedFee).slice(0, 6)} ETH`);
+                addNotification('success', 'Fee Estimated', `CCIP fee: ~${ethers.utils.formatEther(estimatedFee).slice(0, 6)} ETH`);
                 return estimatedFee;
             } else {
                 // Real contract call
-                const amountWei = parseUnits(amount || '100', tokenData.decimals);
+                const amountWei = ethers.utils.parseUnits(amount || '100', tokenData.decimals);
                 const estimatedFee = await contracts.ccip.estimateFee(
                     toChainData.selector,
                     transferForm.targetPool || account,
@@ -142,12 +142,12 @@ const CrossChainManager = () => {
                     ...prev,
                     [feeKey]: {
                         fee: estimatedFee.toString(),
-                        formattedFee: formatEther(estimatedFee),
+                        formattedFee: ethers.utils.formatEther(estimatedFee),
                         timestamp: Date.now()
                     }
                 }));
 
-                addNotification('success', 'Fee Estimated', `CCIP fee: ~${formatEther(estimatedFee).slice(0, 6)} ETH`);
+                addNotification('success', 'Fee Estimated', `CCIP fee: ~${ethers.utils.formatEther(estimatedFee).slice(0, 6)} ETH`);
                 return estimatedFee;
             }
 
@@ -180,13 +180,13 @@ const CrossChainManager = () => {
                 return;
             }
 
-            const amountWei = parseUnits(transferForm.amount, tokenData.decimals);
+            const amountWei = ethers.utils.parseUnits(transferForm.amount, tokenData.decimals);
             
             // Validate and checksum addresses
             let tokenAddress, receiverAddress;
             try {
-                tokenAddress = getAddress(tokenData.address);
-                receiverAddress = getAddress(transferForm.targetPool);
+                tokenAddress = ethers.utils.getAddress(tokenData.address);
+                receiverAddress = ethers.utils.getAddress(transferForm.targetPool);
             } catch (addressError) {
                 addNotification('error', 'Invalid Address', 'Please check that all addresses are valid Ethereum addresses');
                 return;
@@ -290,9 +290,9 @@ const CrossChainManager = () => {
                         return {
                             fromChain: op.fromChain,
                             toChain: op.toChain,
-                            token: getAddress(tokenData.address),
-                            amount: parseUnits(op.amount, tokenData.decimals),
-                            targetPool: getAddress(op.targetPool),
+                            token: ethers.utils.getAddress(tokenData.address),
+                            amount: ethers.utils.parseUnits(op.amount, tokenData.decimals),
+                            targetPool: ethers.utils.getAddress(op.targetPool),
                             expectedApy: Math.floor(op.expectedYield * 100) // Convert to basis points
                         };
                     });
@@ -336,9 +336,9 @@ const CrossChainManager = () => {
                         return {
                             fromChain: op.fromChain,
                             toChain: op.toChain,
-                            token: getAddress(tokenData.address),
-                            amount: parseUnits(op.amount, tokenData.decimals),
-                            targetPool: getAddress(op.targetPool),
+                            token: ethers.utils.getAddress(tokenData.address),
+                            amount: ethers.utils.parseUnits(op.amount, tokenData.decimals),
+                            targetPool: ethers.utils.getAddress(op.targetPool),
                             expectedApy: Math.floor(op.expectedYield * 100)
                         };
                     });

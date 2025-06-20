@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Contract, parseUnits, formatUnits } from 'ethers';
+import { ethers } from 'ethers';
 import { useCrossfluxx } from '../context/CrossfluxxContext.js';
 
 const VaultConfiguration = () => {
@@ -106,7 +106,7 @@ const VaultConfiguration = () => {
                 .map(chain => formData.apyThresholds[chain.name]);
 
             // Convert deposit amount to wei
-            const depositAmountWei = parseUnits(
+            const depositAmountWei = ethers.utils.parseUnits(
                 formData.depositAmount,
                 selectedTokenData.decimals
             );
@@ -120,7 +120,7 @@ const VaultConfiguration = () => {
             });
 
             // First approve token spending
-            const tokenContract = new Contract(
+            const tokenContract = new ethers.Contract(
                 selectedTokenData.address,
                 ['function approve(address spender, uint256 amount) returns (bool)'],
                 contracts.core.signer
@@ -196,7 +196,7 @@ const VaultConfiguration = () => {
             const selectedTokenData = supportedTokens.find(t => t.symbol === formData.selectedToken);
             const withdrawAmount = formData.depositAmount || vaultData.totalDeposited;
             
-            const withdrawAmountWei = parseUnits(
+            const withdrawAmountWei = ethers.utils.parseUnits(
                 withdrawAmount,
                 selectedTokenData.decimals
             );
@@ -279,7 +279,7 @@ const VaultConfiguration = () => {
                         <div>
                             <span className="text-gray-400">Total Deposited:</span>
                             <p className="text-white font-semibold">
-                                ${parseInt(formatUnits(vaultData.totalDeposited, 6)).toLocaleString()}
+                                ${parseInt(ethers.utils.formatUnits(vaultData.totalDeposited, 6)).toLocaleString()}
                             </p>
                         </div>
                         <div>

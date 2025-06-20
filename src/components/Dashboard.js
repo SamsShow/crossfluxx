@@ -36,11 +36,13 @@ function Dashboard() {
     userDeposits,
     marketData,
     executeRebalance,
+    evaluateRebalanceWithAgents,
     isRebalancing,
     currentRebalance,
     loading,
     deposit,
-    addNotification
+    addNotification,
+    agentStatus
   } = useCrossfluxx();
 
   const [depositAmount, setDepositAmount] = useState('');
@@ -367,48 +369,160 @@ function Dashboard() {
     </AnimatePresence>
   );
 
-  const RebalanceButton = () => (
-    <motion.button
-      onClick={executeRebalance}
-      disabled={isRebalancing || loading || !isSystemInitialized || !isWalletConnected}
-      whileHover={{ 
-        scale: !isRebalancing && !loading && isSystemInitialized && isWalletConnected ? 1.02 : 1,
-        boxShadow: !isRebalancing && !loading && isSystemInitialized && isWalletConnected ? "0 20px 40px rgba(34, 197, 94, 0.3)" : "none"
-      }}
-      whileTap={{ scale: 0.98 }}
-      className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:shadow-none flex items-center justify-center space-x-3 relative overflow-hidden border border-green-500/30"
-    >
-      <motion.div
-        className="absolute inset-0 bg-green-400"
-        initial={{ scale: 0, opacity: 0 }}
-        whileHover={{ scale: 1, opacity: 0.1 }}
-        transition={{ duration: 0.3 }}
-      />
-      {isRebalancing ? (
-        <>
-          <motion.svg 
-            className="w-5 h-5" 
-            xmlns="http://www.w3.org/2000/svg" 
-            fill="none" 
-            viewBox="0 0 24 24"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          >
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </motion.svg>
-          <span className="relative z-10">Analyzing Markets...</span>
-        </>
-      ) : (
-        <>
-          <svg className="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span className="relative z-10">Run Rebalance Analysis</span>
-        </>
-      )}
-    </motion.button>
-  );
+  const AgentRebalanceButton = () => {
+    const [showAgentDialog, setShowAgentDialog] = useState(false);
+    const [agentDecision, setAgentDecision] = useState(null);
+
+    const handleAgentEvaluation = async () => {
+      try {
+        setShowAgentDialog(true);
+        const decision = await evaluateRebalanceWithAgents();
+        setAgentDecision(decision);
+      } catch (error) {
+        addNotification({
+          type: 'error',
+          title: 'Agent Evaluation Failed',
+          message: error.message
+        });
+        setShowAgentDialog(false);
+      }
+    };
+
+    const handleExecuteRebalance = async () => {
+      setShowAgentDialog(false);
+      await executeRebalance(agentDecision);
+      setAgentDecision(null);
+    };
+
+    return (
+      <>
+        <motion.button
+          onClick={handleAgentEvaluation}
+          disabled={isRebalancing || loading || !isSystemInitialized || !isWalletConnected}
+          whileHover={{ 
+            scale: !isRebalancing && !loading && isSystemInitialized && isWalletConnected ? 1.02 : 1,
+            boxShadow: !isRebalancing && !loading && isSystemInitialized && isWalletConnected ? "0 20px 40px rgba(34, 197, 94, 0.3)" : "none"
+          }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:shadow-none flex items-center justify-center space-x-3 relative overflow-hidden border border-green-500/30"
+        >
+          <motion.div
+            className="absolute inset-0 bg-green-400"
+            initial={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: 1, opacity: 0.1 }}
+            transition={{ duration: 0.3 }}
+          />
+          {isRebalancing ? (
+            <>
+              <motion.svg 
+                className="w-5 h-5" 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 24 24"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              >
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </motion.svg>
+              <span className="relative z-10">AI Agents Working...</span>
+            </>
+          ) : (
+            <>
+              <svg className="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              <span className="relative z-10">🤖 Get AI Consensus</span>
+            </>
+          )}
+        </motion.button>
+
+        {/* Agent Decision Dialog */}
+        <AnimatePresence>
+          {showAgentDialog && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowAgentDialog(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-gray-900 border border-green-500/30 rounded-xl p-6 max-w-md w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-xl font-bold text-white mb-4">🤖 AI Agent Consensus</h3>
+                
+                {!agentDecision ? (
+                  <div className="flex items-center justify-center py-8">
+                    <motion.svg 
+                      className="w-8 h-8 text-green-400" 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      fill="none" 
+                      viewBox="0 0 24 24"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    >
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </motion.svg>
+                    <span className="ml-3 text-green-400">Consulting AI agents...</span>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-green-500/10 rounded-lg p-3">
+                        <div className="text-sm text-gray-400">Confidence</div>
+                        <div className="text-lg font-bold text-green-400">
+                          {(agentDecision.confidence * 100).toFixed(0)}%
+                        </div>
+                      </div>
+                      <div className="bg-blue-500/10 rounded-lg p-3">
+                        <div className="text-sm text-gray-400">Consensus</div>
+                        <div className="text-lg font-bold text-blue-400">
+                          {(agentDecision.consensus * 100).toFixed(0)}%
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-800/50 rounded-lg p-3">
+                      <div className="text-sm text-gray-400 mb-2">AI Reasoning</div>
+                      <ul className="text-sm text-gray-300 space-y-1">
+                        {agentDecision.reasoning?.map((reason, index) => (
+                          <li key={index} className="flex items-center">
+                            <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                            {reason}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => setShowAgentDialog(false)}
+                        className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleExecuteRebalance}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors"
+                      >
+                        Execute Rebalance
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </>
+    );
+  };
 
   return (
     <div className="relative">
@@ -724,6 +838,81 @@ function Dashboard() {
           </motion.div>
         </div>
 
+        {/* AI Agent Status Section */}
+        <motion.div 
+          variants={itemVariants}
+          whileHover={{ scale: 1.005 }}
+          className="bg-gray-800/50 backdrop-blur-sm border border-purple-500/20 hover:border-purple-400/40 rounded-xl p-6 transition-all duration-300 relative overflow-hidden"
+        >
+          <motion.div
+            className="absolute inset-0 bg-purple-500/5"
+            initial={{ opacity: 0 }}
+            whileHover={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          />
+          <div className="relative z-10">
+            <h3 className="text-2xl font-bold text-white mb-6">🤖 AI Agent Network</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Strategy Agent */}
+              <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-4 hover:border-blue-400/40 transition-colors">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-3 h-3 rounded-full ${agentStatus.strategy?.status === 'running' ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`}></div>
+                    <h4 className="font-semibold text-blue-300">Strategy Agent</h4>
+                  </div>
+                  <span className="text-xs text-blue-400 bg-blue-500/20 px-2 py-1 rounded">
+                    {Math.round(agentStatus.strategy?.confidence || 85)}%
+                  </span>
+                </div>
+                <p className="text-sm text-gray-400 mb-2">
+                  {agentStatus.strategy?.lastAction || 'Backtesting yield strategies'}
+                </p>
+                <div className="text-xs text-blue-300">
+                  Simulations: {agentStatus.strategy?.metrics?.['Simulations Run'] || '247'}
+                </div>
+              </div>
+
+              {/* Signal Agent */}
+              <div className="bg-green-500/10 border border-green-400/20 rounded-lg p-4 hover:border-green-400/40 transition-colors">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-3 h-3 rounded-full ${agentStatus.signal?.status === 'running' ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`}></div>
+                    <h4 className="font-semibold text-green-300">Signal Agent</h4>
+                  </div>
+                  <span className="text-xs text-green-400 bg-green-500/20 px-2 py-1 rounded">
+                    {Math.round(agentStatus.signal?.confidence || 79)}%
+                  </span>
+                </div>
+                <p className="text-sm text-gray-400 mb-2">
+                  {agentStatus.signal?.lastAction || 'Monitoring market signals'}
+                </p>
+                <div className="text-xs text-green-300">
+                  Sources: {agentStatus.signal?.metrics?.['Data Sources'] || '12'}
+                </div>
+              </div>
+
+              {/* Voting Coordinator */}
+              <div className="bg-purple-500/10 border border-purple-400/20 rounded-lg p-4 hover:border-purple-400/40 transition-colors">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-3 h-3 rounded-full ${agentStatus.coordinator?.status === 'running' ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`}></div>
+                    <h4 className="font-semibold text-purple-300">Coordinator</h4>
+                  </div>
+                  <span className="text-xs text-purple-400 bg-purple-500/20 px-2 py-1 rounded">
+                    {Math.round(agentStatus.coordinator?.confidence || 92)}%
+                  </span>
+                </div>
+                <p className="text-sm text-gray-400 mb-2">
+                  {agentStatus.coordinator?.lastAction || 'Coordinating consensus'}
+                </p>
+                <div className="text-xs text-purple-300">
+                  Decisions: {agentStatus.coordinator?.metrics?.['Total Decisions'] || '42'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Rebalance Analysis Section */}
         <motion.div 
           variants={itemVariants}
@@ -741,7 +930,7 @@ function Dashboard() {
             <p className="text-gray-300 mb-6">
               Trigger a comprehensive analysis of current market conditions and potential rebalancing opportunities across all connected chains.
             </p>
-            <RebalanceButton />
+            <AgentRebalanceButton />
           </div>
         </motion.div>
       </motion.div>

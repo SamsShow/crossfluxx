@@ -9,7 +9,7 @@ const elizaLogger = {
 };
 
 /**
- * Crossfluxx Voting Coordinator - Uses Eliza OS for consensus-based rebalancing decisions
+ * Crossfluxx Voting Coordinator - Consensus-based rebalancing decisions
  */
 class VotingCoordinator {
     constructor(config = {}) {
@@ -54,7 +54,7 @@ class VotingCoordinator {
     }
 
     /**
-     * Initialize the Eliza OS Voting Coordinator
+     * Initialize the Voting Coordinator
      */
     async initialize() {
         try {
@@ -64,7 +64,12 @@ class VotingCoordinator {
             // Simplified initialization
             this.runtime = {
                 character: this.character,
-                plugins: [],
+                actions: [
+                    this.createConsensusAction(),
+                    this.createExecutionAction(),
+                    this.createReviewAction(),
+                    this.createEmergencyAction()
+                ],
                 isReady: true
             };
             
@@ -72,10 +77,10 @@ class VotingCoordinator {
             await this.initializeSubAgents();
             
             this.isInitialized = true;
-            console.log('✅ Crossfluxx Voting Coordinator initialized successfully');
+            elizaLogger.info('✅ Crossfluxx Voting Coordinator initialized successfully');
             return true;
         } catch (error) {
-            console.error('❌ Failed to initialize Crossfluxx Voting Coordinator:', error);
+            elizaLogger.error('❌ Failed to initialize Crossfluxx Voting Coordinator:', error);
             throw error;
         }
     }

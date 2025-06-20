@@ -1,4 +1,4 @@
-import { Contract, AbiCoder } from 'ethers';
+import { ethers } from 'ethers';
 
 /**
  * Chainlink Functions Service
@@ -96,7 +96,7 @@ export class FunctionsService {
             const provider = this.providers[network];
             
             if (provider && routerAddress) {
-                this.routers[chainId] = new Contract(
+                this.routers[chainId] = new ethers.Contract(
                     routerAddress,
                     [
                         'function sendRequest(uint64 subscriptionId, bytes calldata data, uint16 dataVersion, uint32 callbackGasLimit, bytes32 donId) external returns (bytes32)',
@@ -467,7 +467,7 @@ export class FunctionsService {
             language: 0 // JavaScript
         };
 
-        return AbiCoder.defaultAbiCoder().encode(
+        return ethers.utils.defaultAbiCoder.encode(
             ['string', 'string[]'],
             [requestConfig.source, requestConfig.args]
         );
