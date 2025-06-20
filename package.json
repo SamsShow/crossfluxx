@@ -21,6 +21,7 @@
     "@web3-react/injected-connector": "^6.0.7",
     "@web3-react/walletconnect-connector": "^6.2.13",
     "axios": "^1.10.0",
+    "chalk": "^5.4.1",
     "chart.js": "^4.4.9",
     "date-fns": "^2.30.0",
     "ethers": "^5.8.0",
@@ -40,7 +41,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test-agents": "node test-agents.js",
+    "quick-test": "node quick-agent-test.js",
+    "demo-agents": "node demo-agents.js",
+    "agents-health": "node -e \"import('./src/agents/index.js').then(m => m.createCrossfluxxAgentSystem()).then(s => s.getSystemStatus()).then(h => console.log('Agent Status:', h.isRunning ? 'Running' : 'Stopped', '- Initialized:', h.isInitialized, '- Agents:', Object.keys(h.agentStatus).length))\""
   },
   "eslintConfig": {
     "extends": [

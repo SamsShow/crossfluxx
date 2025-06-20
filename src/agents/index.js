@@ -233,6 +233,45 @@ class CrossfluxxAgentSystem {
             error: "Manual evaluation not implemented"
         };
     }
+
+    async shutdown() {
+        try {
+            elizaLogger.info("Shutting down Crossfluxx Agent System...");
+            
+            // Clear monitoring intervals
+            if (this.healthCheckInterval) {
+                clearInterval(this.healthCheckInterval);
+                this.healthCheckInterval = null;
+            }
+            
+            if (this.rebalanceCheckInterval) {
+                clearInterval(this.rebalanceCheckInterval);
+                this.rebalanceCheckInterval = null;
+            }
+            
+            // Shutdown individual agents if they have shutdown methods
+            for (const [name, agent] of Object.entries(this.agents)) {
+                if (agent && typeof agent.shutdown === 'function') {
+                    try {
+                        await agent.shutdown();
+                        elizaLogger.info(`${name} agent shutdown complete`);
+                    } catch (error) {
+                        elizaLogger.error(`Error shutting down ${name} agent:`, error);
+                    }
+                }
+            }
+            
+            this.isRunning = false;
+            this.isInitialized = false;
+            
+            elizaLogger.info("Crossfluxx Agent System shutdown complete");
+            return true;
+            
+        } catch (error) {
+            elizaLogger.error("Error during agent system shutdown:", error);
+            return false;
+        }
+    }
 }
 
 // Factory function to create and initialize the agent system
